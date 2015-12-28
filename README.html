@@ -133,7 +133,17 @@
 .highlight .il { color: #40a070 } /* Literal.Number.Integer.Long */</style>
 <h1>mongoose-ninjia</h1>
 
-<p>不存在</p>
+<h2>mongoexport转义</h2>
+
+<p>注意，如果-q后面的条件是用“”双引号括起来的话$符需要做一下转义\$</p>
+
+<p>mongoexport -d xbm-wechat-api -c senddeliveryhistories -o senddeliveryhistories.json --jsonArray --query &quot;{date:{\$in:[&#39;20150825&#39;,&#39;20150826&#39;]}}&quot;</p>
+
+<p>##</p>
+
+<p>mongodb自带的 new date了，他的时间是utc的时间，和咱们中国时区少8个小时</p>
+
+<h3>不存在</h3>
 <div class="highlight"><pre><span class="vg">SendDeliveryHistory</span><span class="o">.</span><span class="vg">find</span><span class="p">({</span>
 <span class="w">  </span><span class="nl">date:</span><span class="w"> </span><span class="vg">current_date</span><span class="p">,</span><span class="w"> </span>
 <span class="w">  </span><span class="nl">status:</span><span class="w"> </span><span class="il">0</span><span class="p">,</span>
@@ -142,7 +152,7 @@
 <span class="w">  </span><span class="p">}</span>
 <span class="p">})</span><span class="o">.</span>
 </pre></div>
-<p>存在，但size == 0的</p>
+<h3>存在，但size == 0的</h3>
 <div class="highlight"><pre><span class="vg">SendDeliveryHistory</span><span class="o">.</span><span class="vg">find</span><span class="p">({</span>
 <span class="w">  </span><span class="nl">date:</span><span class="w"> </span><span class="vg">current_date</span><span class="p">,</span><span class="w"> </span>
 <span class="w">  </span><span class="nl">status:</span><span class="w"> </span><span class="il">0</span><span class="p">,</span>
@@ -151,6 +161,115 @@
 <span class="w">  </span><span class="p">}</span>
 <span class="p">})</span><span class="o">.</span>
 </pre></div>
+<h3>and 和 or</h3>
+<div class="highlight"><pre><span class="vg">db</span><span class="o">.</span><span class="vg">senddeliveryhistories</span><span class="o">.</span><span class="vg">find</span><span class="p">({</span>
+<span class="w">    </span><span class="s2">&quot;$and&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nl">created_at:</span><span class="p">{</span>
+<span class="w">                </span><span class="s2">&quot;$gt&quot;</span><span class="o">:</span><span class="w"> </span><span class="vg">ISODate</span><span class="p">(</span><span class="s2">&quot;2015-08-19T12:30:18.595Z&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="p">,</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nl">created_at:</span><span class="p">{</span>
+<span class="w">                </span><span class="s2">&quot;$lt&quot;</span><span class="o">:</span><span class="w"> </span><span class="vg">ISODate</span><span class="p">(</span><span class="s2">&quot;2015-08-20T12:30:18.595Z&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">})</span>
+
+
+<span class="vg">SendDeliveryHistory</span><span class="o">.</span><span class="vg">find</span><span class="p">({</span>
+<span class="w">  </span><span class="nl">status:</span><span class="w"> </span><span class="il">0</span><span class="p">,</span>
+<span class="w">  </span><span class="vg">delivery_number</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="err">$</span><span class="nl">exists:</span><span class="w"> </span><span class="vg">false</span><span class="w"> </span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">})</span><span class="o">.</span><span class="vg">and</span><span class="p">([{</span><span class="w"> </span><span class="nl">created_at:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="s2">&quot;$gt&quot;</span><span class="o">:</span><span class="w"> </span><span class="vg">new</span><span class="w"> </span><span class="vg">Date</span><span class="p">(</span><span class="il">2015</span><span class="p">,</span><span class="il">07</span><span class="p">,</span><span class="il">19</span><span class="p">,</span><span class="il">22</span><span class="p">)</span>
+<span class="p">}</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">created_at:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="s2">&quot;$lt&quot;</span><span class="o">:</span><span class="w"> </span><span class="vg">new</span><span class="w"> </span><span class="vg">Date</span><span class="p">(</span><span class="il">2015</span><span class="p">,</span><span class="il">07</span><span class="p">,</span><span class="il">20</span><span class="p">,</span><span class="il">13</span><span class="p">,</span><span class="il">55</span><span class="p">)</span>
+<span class="p">}</span><span class="w"> </span><span class="p">}])</span><span class="o">.</span><span class="vg">then</span><span class="p">(</span><span class="vg">function</span><span class="p">(</span><span class="vg">SendDeliveryHistoryArr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="vg">var</span><span class="w"> </span><span class="vg">callback_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[];</span>
+<span class="w">    </span><span class="vg">console</span><span class="o">.</span><span class="vg">log</span><span class="p">(</span><span class="vg">SendDeliveryHistoryArr</span><span class="p">)</span>
+<span class="p">});</span>
+</pre></div>
+<p>说明</p>
+
+<ul>
+<li>new Date(2015,07,20,13,55)
+
+<ul>
+<li>2015年</li>
+<li>07实际是8月</li>
+<li>20日</li>
+<li>20点</li>
+<li>13分</li>
+<li>55秒</li>
+</ul></li>
+</ul>
+
+<h2>eq</h2>
+
+<p>MongoDB没有&quot;$eq&quot;操作符,但是只有一个元素的&quot;$in&quot;的操作效果是一样的</p>
+
+<h2>数组查询</h2>
+
+<p>数据如下</p>
+<div class="highlight"><pre><span class="cm">/* 0 */</span>
+<span class="p">{</span>
+    <span class="s">&quot;_id&quot;</span> <span class="o">:</span> <span class="n">ObjectId</span><span class="p">(</span><span class="s">&quot;55d83d7af492ea270c7812dc&quot;</span><span class="p">),</span>
+    <span class="s">&quot;status&quot;</span> <span class="o">:</span> <span class="mh">0</span><span class="p">,</span>
+    <span class="s">&quot;items&quot;</span> <span class="o">:</span> <span class="p">[</span> 
+        <span class="p">{</span>
+            <span class="s">&quot;product&quot;</span> <span class="o">:</span> <span class="n">ObjectId</span><span class="p">(</span><span class="s">&quot;55c9d91cb372a223713be929&quot;</span><span class="p">),</span>
+            <span class="s">&quot;name&quot;</span> <span class="o">:</span> <span class="s">&quot;眼贴&quot;</span><span class="p">,</span>
+            <span class="s">&quot;count&quot;</span> <span class="o">:</span> <span class="s">&quot;3&quot;</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="s">&quot;type&quot;</span> <span class="o">:</span> <span class="mh">0</span><span class="p">,</span>
+    <span class="s">&quot;__v&quot;</span> <span class="o">:</span> <span class="mh">0</span>
+<span class="p">}</span>
+</pre></div>
+<p>做法</p>
+<div class="highlight"><pre><span class="vg">db</span><span class="o">.</span><span class="vg">senddeliveryhistories</span><span class="o">.</span><span class="vg">find</span><span class="p">({</span>
+<span class="w">    </span><span class="s2">&quot;items.0.name&quot;</span><span class="o">:</span><span class="p">{</span><span class="err">$</span><span class="nl">in:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;眼贴&quot;</span><span class="p">]}</span>
+<span class="p">})</span>
+</pre></div>
+<h2>不等于</h2>
+<div class="highlight"><pre><span class="w">  </span><span class="nl">remark:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s2">&quot;$ne&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;转货&quot;</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span>
+</pre></div>
+<h2>between and</h2>
+
+<p>可以翻译成lt and gt</p>
+
+<p>db.getCollection(&#39;orders&#39;).find({&quot;$and&quot;:[
+      {status2:1},
+      {status:&#39;0&#39;}
+ ]}).count()</p>
+
+<h2>mongoose用$push的时候，都会创建自动_id，能否不创建</h2>
+
+<p>var LogSchema = new Schema({
+    contents:       [{
+                        string:        { type: String },
+                        levle:           { type: Number },
+                        }],
+});</p>
+
+<p>Log.findByIdAndUpdate( id , { $push : { string : ‘123’ , level : 1 } } ,  { upsert : true } , callback );</p>
+
+<p>执行后，数据库内容：</p>
+
+<p>{ “id” : ObjectId(&quot;…&quot;),“contents” : [ { “level” : 1, “content” : “123”, “_id” : ObjectId(“568137b4873c0d3b1ead3d1d”) }]  }</p>
+
+<p>“_id” : ObjectId(“568137b4873c0d3b1ead3d1d”) ，我不想要，能否去掉？</p>
+
+<p>在schema设定的时候直接_id:false</p>
+
+<p>https://cnodejs.org/topic/568139e1b9de25e81e01c1b5#568152ffb9de25e81e01c1bd</p>
+
 			          	</article>
 			        </div>
 					</div>
